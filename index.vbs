@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 Option Explicit
 
 Imports "src\parameters.vbs"
@@ -16,11 +16,17 @@ If Not IsEmpty(objParam.Markdown) Then
   If Not objPackage.IsIconLinkValid Then
     Quit
   End If
+  Imports "src\errorLog.vbs"
+  Dim objErrorLog: Set objErrorLog = New ErrorLogHandler  
   Const WINDOW_STYLE_HIDDEN = 0
   Const WAIT_ON_RETURN = True
-  If CreateObject("WScript.Shell").Run(Format("""{0}"" ""{1}""", Array(objPackage.IconLink.Path, objParam.Markdown)), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN) Then
-    MsgBox "An unhandled exception occured.", vbOKOnly + vbCritical, "Convert to HTML"
+  If CreateObject("WScript.Shell").Run(Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" ""{1}"" 2> ""{2}""""", Array(objPackage.IconLink.Path, objParam.Markdown, objErrorLog.Path)), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN) Then
+    With objErrorLog
+      .Read
+      .Delete
+    End With
   End If
+  Set objErrorLog = Nothing
   Quit
 End If
 
