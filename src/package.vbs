@@ -2,7 +2,7 @@
 ''' Returns information about the resource files used by the project.
 ''' It also provides a way to manage the custom icon link that can be installed and uninstalled.
 ''' </summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 ''' <summary>
 ''' Represents the package files used by the project.
@@ -13,13 +13,6 @@ Class Package
   ''' The package hashtable.
   ''' </summary>
   Private objPackage
-
-  ''' <summary>
-  ''' Stores the partial "arguments" property string of the custom icon link.
-  ''' The command is partial because it does not include the markdown file path string.
-  ''' The markdown file path string will be input when calling the shortcut link.
-  ''' </summary>
-  Private strCustomIconLinkArguments
 
   ''' <summary>
   ''' The file system object.
@@ -78,18 +71,18 @@ Class Package
       .Add "MenuIconPath", objFs.BuildPath(.Item("ResourcePath"), "menu.ico")
       .Add "PwshExePath", GetPwshPath
       .Add "IconLink", New IconLinkResource
-      strCustomIconLinkArguments = Format("-ep Bypass -nop -w Hidden -f ""{0}"" -Markdown", .Item("PwshScriptPath"))
     End With
   End Sub
 
   ''' <summary>
   ''' Create the custom icon link file.
   ''' </summary>
-  Sub CreateIconLink
+  ''' <param name="strMarkdownPath">The input markdown file path.</param>
+  Sub CreateIconLink(ByVal strMarkdownPath)
     objFs.CreateTextFile(Me.IconLink.Path).Close
     With GetCustomIconLink
       .Path = Me.PwshExePath 
-      .Arguments = strCustomIconLinkArguments
+      .Arguments = Format("-ep Bypass -nop -w Hidden -f ""{0}"" -Markdown ""{1}""", Array(Me.PwshScriptPath, strMarkdownPath))
       .SetIconLocation Me.MenuIconPath, 0
       .Save
     End With
@@ -102,17 +95,6 @@ Class Package
     On Error Resume Next
     objFs.DeleteFile Me.IconLink.Path
   End Sub
-
-  ''' <summary>
-  ''' Validate the link properties.
-  ''' </summary>
-  ''' <returns>True if the link properties are as expected.</returns>
-  Function IsIconLinkValid
-    Dim strTargetCommand: strTargetCommand = "{0} {1}"
-    With GetCustomIconLink
-      IsIconLinkValid = Not StrComp(Format(strTargetCommand, Array(.Path, .Arguments)), Format(strTargetCommand, Array(Me.PwshExePath, strCustomIconLinkArguments)), vbTextCompare)
-    End With
-  End Function
 
   ''' <summary>
   ''' Get the custom icon link object.
@@ -176,8 +158,8 @@ Class IconLinkResource
   End Property
 
   Private Sub Class_Initialize()
-    strDirName = CreateObject("WScript.Shell").SpecialFolders("StartMenu")
-    strName = "cvmd2html.lnk"
+    strDirName = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%")
+    strName = LCase(Mid(CreateObject("Scriptlet.TypeLib").Guid, 2, 36)) & ".tmp.lnk"
     strPath = CreateObject("Scripting.FileSystemObject").BuildPath(strDirName, strName)
   End Sub
 
