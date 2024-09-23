@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 Option Explicit
 
 Imports "src\parameters.vbs"
@@ -13,19 +13,18 @@ Dim objPackage: Set objPackage = New Package
 
 ''' The application execution.
 If Not IsEmpty(objParam.Markdown) Then
-  If Not objPackage.IsIconLinkValid Then
-    Quit
-  End If
   Imports "src\errorLog.vbs"
-  Dim objErrorLog: Set objErrorLog = New ErrorLogHandler  
+  Dim objErrorLog: Set objErrorLog = New ErrorLogHandler
+  objPackage.CreateIconLink objParam.Markdown
   Const WINDOW_STYLE_HIDDEN = 0
   Const WAIT_ON_RETURN = True
-  If CreateObject("WScript.Shell").Run(Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" ""{1}"" 2> ""{2}""""", Array(objPackage.IconLink.Path, objParam.Markdown, objErrorLog.Path)), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN) Then
+  If CreateObject("WScript.Shell").Run(Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" 2> ""{1}""""", Array(objPackage.IconLink.Path, objErrorLog.Path)), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN) Then
     With objErrorLog
       .Read
       .Delete
     End With
   End If
+  objPackage.DeleteIconLink
   Set objErrorLog = Nothing
   Quit
 End If
@@ -35,11 +34,9 @@ If objParam.Install Or objParam.Unset Then
   Imports "src\setup.vbs"
   Dim objSetup: Set objSetup = New Setup
   If objParam.Install Then
-    objPackage.CreateIconLink
     objSetup.Install objParam.NoIcon, objPackage.MenuIconPath
   ElseIf objParam.Unset Then
     objSetup.Unset
-    objPackage.DeleteIconLink
   End If
   Set objSetup = Nothing
 End If
