@@ -2,7 +2,7 @@
 ''' Returns information about the resource files used by the project.
 ''' It also provides a way to manage the custom icon link that can be installed and uninstalled.
 ''' </summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 
 ''' <summary>
 ''' Represents the package files used by the project.
@@ -13,11 +13,6 @@ Class Package
   ''' The package hashtable.
   ''' </summary>
   Private objPackage
-
-  ''' <summary>
-  ''' The file system object.
-  ''' </summary>
-  Private objFs
 
   ''' <summary>
   ''' The project root path string.
@@ -62,7 +57,6 @@ Class Package
   End Property
 
   Private Sub Class_Initialize
-    Set objFs = CreateObject("Scripting.FileSystemObject")
     Set objPackage = CreateObject("Scripting.Dictionary")
     With objPackage
       .Add "Root", objFs.GetParentFolderName(WScript.ScriptFullName)
@@ -102,7 +96,7 @@ Class Package
   ''' <returns>The specified link file object.</returns>
   Private Function GetCustomIconLink
     With Me.IconLink
-      Set GetCustomIconLink = CreateObject("Shell.Application").NameSpace(.DirName).ParseName(.Name).GetLink
+      Set GetCustomIconLink = objShell.NameSpace(.DirName).ParseName(.Name).GetLink
     End With
   End Function
 
@@ -112,7 +106,7 @@ Class Package
   ''' <returns>The pwsh.exe full path.</returns>
   Private Function GetPwshPath
     ' The HKLM registry subkey stores the PowerShell Core application path.
-    GetObject("winmgmts:StdRegProv").GetStringValue , "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pwsh.exe",, GetPwshPath
+    objRegistry.GetStringValue , "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pwsh.exe",, GetPwshPath
   End Function
 
   Private Sub Class_Terminate
@@ -121,7 +115,6 @@ Class Package
       objPackage.RemoveAll
     End If
     Set objPackage = Nothing
-    Set objFs = Nothing
   End Sub
 
 End Class
@@ -158,9 +151,9 @@ Class IconLinkResource
   End Property
 
   Private Sub Class_Initialize()
-    strDirName = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%")
-    strName = LCase(Mid(CreateObject("Scriptlet.TypeLib").Guid, 2, 36)) & ".tmp.lnk"
-    strPath = CreateObject("Scripting.FileSystemObject").BuildPath(strDirName, strName)
+    strDirName = objWShell.ExpandEnvironmentStrings("%TEMP%")
+    strName = LCase(Mid(objTypeLib.Guid, 2, 36)) & ".tmp.lnk"
+    strPath = objFs.BuildPath(strDirName, strName)
   End Sub
 
 End Class

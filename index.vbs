@@ -2,8 +2,16 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.5</version>
+''' <version>0.0.1.6</version>
 Option Explicit
+
+Dim objFs, objWShell, objShell, objTypeLib, objWmiService, objRegistry
+Set objFs = CreateObject("Scripting.FileSystemObject")
+Set objWShell = CreateObject("WScript.Shell")
+Set objShell = CreateObject("Shell.Application")
+Set objTypeLib = CreateObject("Scriptlet.TypeLib")
+Set objWmiService = CreateObject("WbemScripting.SWbemLocator").ConnectServer()
+Set objRegistry = objWmiService.Get("StdRegProv")
 
 Imports "src\parameters.vbs"
 Imports "src\package.vbs"
@@ -16,11 +24,11 @@ If Not IsEmpty(objParam.Markdown) Then
   Imports "src\errorLog.vbs"
   Dim objErrorLog: Set objErrorLog = New ErrorLogHandler
   Const WINDOW_STYLE_HIDDEN = &HC
-  Dim objStartInfo: Set objStartInfo = GetObject("winmgmts:Win32_ProcessStartup").SpawnInstance_
+  Dim objStartInfo: Set objStartInfo = objWmiService.Get("Win32_ProcessStartup").SpawnInstance_
   objStartInfo.ShowWindow = WINDOW_STYLE_HIDDEN
   Dim intCmdExeId
   objPackage.CreateIconLink objParam.Markdown
-  GetObject("winmgmts:Win32_Process").Create Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" 2> ""{1}""""", Array(objPackage.IconLink.Path, objErrorLog.Path)),, objStartInfo, intCmdExeId
+  objWmiService.Get("Win32_Process").Create Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" 2> ""{1}""""", Array(objPackage.IconLink.Path, objErrorLog.Path)),, objStartInfo, intCmdExeId
   Dim objSink: Set objSink = WScript.CreateObject("WbemScripting.SWbemSink", "PwshProcess_")
   WaitForChildExit intCmdExeId, objSink
   objPackage.DeleteIconLink
@@ -57,7 +65,7 @@ Sub WaitForChildExit(ByVal intParentProcessId, objSink)
   ' Select the process whose parent is the intermediate process used for executing the link.
   Dim strWmiQuery: strWmiQuery = "SELECT * FROM __InstanceDeletionEvent WITHIN 0.1 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.Name='pwsh.exe' AND TargetInstance.ParentProcessId=" & intParentProcessId
   ' Wait for the child process to exit.
-  GetObject("winmgmts:").ExecNotificationQueryAsync objSink, strWmiQuery
+  objWmiService.ExecNotificationQueryAsync objSink, strWmiQuery
   While Not objSink Is Nothing
     WScript.Sleep 1
   Wend
@@ -114,7 +122,7 @@ End Function
 Sub Imports(ByVal strLibraryPath)
   On Error Resume Next
   Const FOR_READING = 1
-  With CreateObject("Scripting.FileSystemObject")
+  With objFs
     With .OpenTextFile(.BuildPath(.GetParentFolderName(WScript.ScriptFullName), strLibraryPath), FOR_READING)
       ExecuteGlobal .ReadAll
       .Close
@@ -126,6 +134,12 @@ End Sub
 ''' Clean up and quit.
 ''' </summary>
 Sub Quit
+  Set objFs = Nothing
+  Set objWShell = Nothing
+  Set objShell = Nothing
+  Set objTypeLib = Nothing
+  Set objWmiService = Nothing
+  Set objRegistry = Nothing
   Set objParam = Nothing
   Set objPackage = Nothing
   WScript.Quit

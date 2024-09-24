@@ -1,17 +1,12 @@
 ''' <summary>
 ''' Returns the methods for managing the shortcut menu option: install and uninstall.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 
 ''' <summary>
 ''' Represents the setup methods for managing the shortcut records in the registry.
 ''' </summary>
 Class Setup
-
-  ''' <summary>
-  ''' The Registry Provider WMI class object.
-  ''' </summary>
-  Private objRegistry
 
   ''' <summary>
   ''' HKCU registry hive.
@@ -24,7 +19,6 @@ Class Setup
   Private VERB_KEY
 
   Private Sub Class_Initialize
-    Set objRegistry = GetObject("winmgmts:StdRegProv")
     HKCU = &H80000001
     VERB_KEY = "SOFTWARE\Classes\SystemFileAssociations\.md\shell\cthtml"
   End Sub
@@ -80,10 +74,6 @@ Class Setup
       End If
       .DeleteKey HKCU, strKey
     End With
-  End Sub
-
-  Private Sub Class_Terminate
-    Set objRegistry = Nothing
   End Sub
 
 End Class
