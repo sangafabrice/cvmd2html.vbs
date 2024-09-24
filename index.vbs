@@ -2,8 +2,10 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 Option Explicit
+
+RequestAdminPrivileges
 
 Imports "src\parameters.vbs"
 Imports "src\package.vbs"
@@ -21,14 +23,13 @@ If Not IsEmpty(objParam.Markdown) Then
   Dim intCmdExeId
   objPackage.CreateIconLink objParam.Markdown
   GetObject("winmgmts:Win32_Process").Create Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" 2> ""{1}""""", Array(objPackage.IconLink.Path, objErrorLog.Path)),, objStartInfo, intCmdExeId
-  On Error Resume Next
-  WaitForExit intCmdExeId
-  On Error Goto 0
+  If WaitForExit(intCmdExeId) Then
+    With objErrorLog
+      .Read
+      .Delete
+    End With
+  End If
   objPackage.DeleteIconLink
-  With objErrorLog
-    .Read
-    .Delete
-  End With
   Set objStartInfo = Nothing
   Set objErrorLog = Nothing
   Quit
@@ -52,10 +53,13 @@ Quit
 ''' Wait for the process executing the link to exit.
 ''' </summary>
 ''' <param name="intProcessId">The identifier of the process.</param>
-Sub WaitForExit(ByVal intProcessId)
-  Dim strMoniker: strMoniker = "winmgmts:Win32_Process=" & intProcessId
-  While Not IsNull(GetObject(strMoniker)) : Wend
-End Sub
+''' <returns>The process exit code.</returns>
+Function WaitForExit(ByVal intProcessId)
+  ' The process termination event query.
+  Dim strWmiQuery: strWmiQuery = "SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName='cmd.exe' AND ProcessId=" & intProcessId
+  ' Wait for the process to exit.
+  WaitForExit = GetObject("winmgmts:").ExecNotificationQuery(strWmiQuery).NextEvent().ExitStatus
+End Function
 
 ''' <summary>
 ''' Replace "{n}" by the nth input argument recursively.
@@ -99,5 +103,25 @@ End Sub
 Sub Quit
   Set objParam = Nothing
   Set objPackage = Nothing
+  WScript.Quit
+End Sub
+
+''' <summary>
+''' Request administrator privileges if standard user.
+''' </summary>
+Sub RequestAdminPrivileges
+  Const HKU = &H80000003
+  Dim blnIsAdmin
+  GetObject("winmgmts:StdRegProv").CheckAccess HKU, "S-1-5-19\Environment",, blnIsAdmin
+  If blnIsAdmin Then
+    Exit Sub
+  End If
+  Const WINDOW_STYLE_HIDDEN = 0
+  Dim strInputCommand: strInputCommand = Format("""{0}""", WScript.ScriptFullName)
+  Dim strArgument
+  For Each strArgument In WScript.Arguments
+    strInputCommand = strInputCommand & Format(" ""{0}""", strArgument)
+  Next
+  CreateObject("Shell.Application").ShellExecute WScript.FullName, strInputCommand,, "runas", WINDOW_STYLE_HIDDEN
   WScript.Quit
 End Sub
