@@ -1,7 +1,7 @@
 ''' <summary>
 ''' The markdown to html converter.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 
 Imports "src\msgbox.vbs"
 
@@ -117,23 +117,19 @@ Class MarkdownToHtmlType
         "<head>" & _
           "<meta charset='UTF-8' />" & _
           "<meta http-equiv='X-UA-Compatible' content='IE=edge' />" & _
+          "<script type='text/javascript'>" & _
+            GetContent(strJsLibraryPath) & _
+            "function convertMarkdown(markdownContent) {" & _
+              "return (new showdown.Converter()).makeHtml(markdownContent);" & _
+            "}" & _
+          "</script>" & _
         "</head>" & _
         "<body>" & _
         "</body>" & _
         "</html>"
       .Close
-      Dim objScript: Set objScript = .createElement("script")
-      With objScript
-        .type = "text/javascript"
-        .text = GetContent(strJsLibraryPath) & _
-          "function convertMarkdown(markdownContent) {" & _
-            "return (new showdown.Converter()).makeHtml(markdownContent);" & _
-          "}"
-      End With
-      .getElementsByTagName("head")(0).appendChild(objScript)
       ConvertToHtml = .parentWindow.convertMarkdown(strMarkdownContent)
     End With
-    Set objScript = Nothing
   End Function
 
   Private Sub Class_Terminate
