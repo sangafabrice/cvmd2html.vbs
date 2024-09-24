@@ -1,7 +1,7 @@
 ''' <summary>
 ''' Returns the methods for managing the shortcut menu option: install and uninstall.
 ''' </summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 ''' <summary>
 ''' Represents the setup methods for managing the shortcut records in the registry.
@@ -9,9 +9,9 @@
 Class Setup
 
   ''' <summary>
-  ''' The format of the HKCU key.
+  ''' The parameters hashtable.
   ''' </summary>
-  Private KEY_FORMAT
+  Private objRegistry
 
   ''' <summary>
   ''' HKCU registry hive.
@@ -24,7 +24,7 @@ Class Setup
   Private VERB_KEY
 
   Private Sub Class_Initialize
-    KEY_FORMAT = "HKCU\{0}\"
+    Set objRegistry = GetObject("winmgmts:StdRegProv")
     HKCU = &H80000001
     VERB_KEY = "SOFTWARE\Classes\SystemFileAssociations\.md\shell\cthtml"
   End Sub
@@ -35,23 +35,21 @@ Class Setup
   ''' <param name="blnParamNoIcon">Specifies that the custom menu icon should not be set.</param>
   ''' <param name="strMenuIconPath">The shortcut menu icon path.</param>
   Sub Install(ByVal blnParamNoIcon, ByVal strMenuIconPath)
-    Dim strVerbKey: strVerbKey = Format(KEY_FORMAT, VERB_KEY)
-    Dim strCommandKey: strCommandKey = strVerbKey & "command\"
+    Dim strCommandKey: strCommandKey = VERB_KEY & "\command"
     With New RegExp
       .Pattern = "\\cscript\.exe$"
       .IgnoreCase = True
       Dim strCommand: strCommand = Format("{0} ""{1}"" /Markdown:""%1""", Array(.Replace(WScript.FullName, "\wscript.exe"), WScript.ScriptFullName))
     End With
-    With objWShell
-      .RegWrite strCommandKey, strCommand
-      .RegWrite strVerbKey, "Convert to &HTML"
-      Dim strIconValueName: strIconValueName = strVerbKey & "Icon"
-      If blnParamNoIcon Then
-        On Error Resume Next
-        .RegDelete strIconValueName
-        On Error Goto 0
+    With objRegistry
+      .CreateKey HKCU, strCommandKey
+      .SetStringValue HKCU, strCommandKey,, strCommand
+      .SetStringValue HKCU, VERB_KEY,, "Convert to &HTML"
+      Dim strIconValueName: strIconValueName = "Icon"
+      If objParam.NoIcon Then
+        .DeleteValue HKCU, VERB_KEY, strIconValueName
       Else
-        .RegWrite strIconValueName, strMenuIconPath
+        .SetStringValue HKCU, VERB_KEY, strIconValueName, strMenuIconPath
       End If
     End With
   End Sub
@@ -73,17 +71,19 @@ Class Setup
   ''' <param name="strKey">A registry key.</param>
   Private Sub DeleteSubkeyTree(ByVal strKey)
     Dim astrSNames, strSName
-    With GetObject("winmgmts:StdRegProv")
+    With objRegistry
       .EnumKey HKCU, strKey, astrSNames
       If IsArray(astrSNames) Then
         For Each strSName In astrSNames
           DeleteSubkeyTree Format("{0}\{1}", Array(strKey, strSName))
         Next
       End If
-      On Error Resume Next
-      objWShell.RegDelete Format(KEY_FORMAT, strKey)
-      On Error Goto 0
+      .DeleteKey HKCU, strKey
     End With
+  End Sub
+
+  Private Sub Class_Terminate
+    Set objRegistry = Nothing
   End Sub
 
 End Class

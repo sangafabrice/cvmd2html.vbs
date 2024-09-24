@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.3</version>
+''' <version>0.0.1.7</version>
 Option Explicit
 
 Dim objFs, objWShell, objTypeLib
