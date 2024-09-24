@@ -1,7 +1,7 @@
 ''' <summary>
 ''' Returns the methods for managing the shortcut menu option: install and uninstall.
 ''' </summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 
 ''' <summary>
 ''' Represents the setup methods for managing the shortcut records in the registry.
@@ -36,11 +36,7 @@ Class Setup
   ''' <param name="strMenuIconPath">The shortcut menu icon path.</param>
   Sub Install(ByVal blnParamNoIcon, ByVal strMenuIconPath)
     Dim strCommandKey: strCommandKey = VERB_KEY & "\command"
-    With New RegExp
-      .Pattern = "\\cscript\.exe$"
-      .IgnoreCase = True
-      Dim strCommand: strCommand = Format("{0} ""{1}"" /Markdown:""%1""", Array(.Replace(WScript.FullName, "\wscript.exe"), WScript.ScriptFullName))
-    End With
+    Dim strCommand: strCommand = Format("{0} ""{1}"" /Markdown:""%1"" /RunLink", Array(GetDefaultCustomIconLinkTarget, WScript.ScriptFullName))
     With objRegistry
       .CreateKey HKCU, strCommandKey
       .SetStringValue HKCU, strCommandKey,, strCommand

@@ -2,13 +2,12 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.7</version>
+''' <version>0.0.1.8</version>
 Option Explicit
 
-Dim objFs, objWShell, objTypeLib
+Dim objFs, objWShell
 Set objFs = CreateObject("Scripting.FileSystemObject")
 Set objWShell = CreateObject("WScript.Shell")
-Set objTypeLib = CreateObject("Scriptlet.TypeLib")
 
 Imports "src\parameters.vbs"
 Imports "src\package.vbs"
@@ -17,20 +16,20 @@ Dim objParam: Set objParam = New Parameters
 Dim objPackage: Set objPackage = New Package
 
 ''' The application execution.
-If Not IsEmpty(objParam.Markdown) Then
-  Imports "src\errorLog.vbs"
-  Dim objErrorLog: Set objErrorLog = New ErrorLogHandler
-  objPackage.CreateIconLink objParam.Markdown
+If objParam.RunLink Then
   Const WINDOW_STYLE_HIDDEN = 0
   Const WAIT_ON_RETURN = True
-  If objWShell.Run(Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" 2> ""{1}""""", Array(objPackage.IconLink.Path, objErrorLog.Path)), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN) Then
-    With objErrorLog
-      .Read
-      .Delete
-    End With
-  End If
+  objPackage.CreateIconLink objParam.Markdown
+  objWShell.Run Format("""{0}""", objPackage.IconLink.Path), WINDOW_STYLE_HIDDEN, WAIT_ON_RETURN
   objPackage.DeleteIconLink
-  Set objErrorLog = Nothing
+  Quit
+End If
+
+If Not IsEmpty(objParam.Markdown) Then
+  Imports "src\conhost.vbs"
+  ConsoleHost.SetConsoleHostProperties objPackage.PwshExePath, objPackage.PwshScriptPath
+  ConsoleHost.StartWith objParam.Markdown
+  Set ConsoleHost = Nothing
   Quit
 End If
 
@@ -47,6 +46,16 @@ If objParam.Install Or objParam.Unset Then
 End If
 
 Quit
+
+''' <summary>
+''' Get the WSH runtime in GUI mode (wscript.exe).
+''' </summary>
+''' <returns>The WScript.Exe path.</returns>
+Function GetDefaultCustomIconLinkTarget
+  With objFs
+    GetDefaultCustomIconLinkTarget = .BuildPath(.GetParentFolderName(WScript.FullName), "wscript.exe")
+  End With
+End Function
 
 ''' <summary>
 ''' Replace "{n}" by the nth input argument recursively.
@@ -90,7 +99,6 @@ End Sub
 Sub Quit
   Set objFs = Nothing
   Set objWShell = Nothing
-  Set objTypeLib = Nothing
   Set objParam = Nothing
   Set objPackage = Nothing
   WScript.Quit

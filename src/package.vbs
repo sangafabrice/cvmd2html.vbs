@@ -2,7 +2,7 @@
 ''' Returns information about the resource files used by the project.
 ''' It also provides a way to manage the custom icon link that can be installed and uninstalled.
 ''' </summary>
-''' <version>0.0.1.4</version>
+''' <version>0.0.1.5</version>
 
 ''' <summary>
 ''' Represents the package files used by the project.
@@ -61,7 +61,7 @@ Class Package
     With objPackage
       .Add "Root", objFs.GetParentFolderName(WScript.ScriptFullName)
       .Add "ResourcePath", objFs.BuildPath(.Item("Root"), "rsc")
-      .Add "PwshScriptPath", objFs.BuildPath(.Item("ResourcePath"), "cvmd2html.ps1")
+      .Add "PwshScriptPath", objFs.BuildPath(.Item("Root"), "cvmd2html.psd1")
       .Add "MenuIconPath", objFs.BuildPath(.Item("ResourcePath"), "menu.ico")
       .Add "PwshExePath", GetPwshPath
       .Add "IconLink", New IconLinkResource
@@ -74,8 +74,8 @@ Class Package
   ''' <param name="strMarkdownPath">The input markdown file path.</param>
   Sub CreateIconLink(ByVal strMarkdownPath)
     With GetCustomIconLink
-      .TargetPath = Me.PwshExePath 
-      .Arguments = Format("-ep Bypass -nop -w Hidden -f ""{0}"" -Markdown ""{1}""", Array(Me.PwshScriptPath, strMarkdownPath))
+      .TargetPath = GetDefaultCustomIconLinkTarget
+      .Arguments = Format("""{0}"" /Markdown:""{1}""", Array(WScript.ScriptFullName, strMarkdownPath))
       .IconLocation = Me.MenuIconPath
       .Save
     End With
@@ -149,7 +149,7 @@ Class IconLinkResource
 
   Private Sub Class_Initialize()
     strDirName = objWShell.ExpandEnvironmentStrings("%TEMP%")
-    strName = LCase(Mid(objTypeLib.Guid, 2, 36)) & ".tmp.lnk"
+    strName = LCase(Mid(CreateObject("Scriptlet.TypeLib").Guid, 2, 36)) & ".tmp.lnk"
     strPath = objFs.BuildPath(strDirName, strName)
   End Sub
 

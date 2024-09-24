@@ -1,7 +1,7 @@
 ''' <summary>
 ''' Returns the parsed parameters.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 
 ''' <summary>
 ''' Represents the input arguments and parameters.
@@ -41,6 +41,13 @@ Class Parameters
     Unset = objParam("Unset")
   End Property
 
+  ''' <summary>
+  ''' Restarts the runtime with the custom icon.
+  ''' </summary>
+  Property Get RunLink
+    RunLink = objParam("RunLink")
+  End Property
+
   Private Sub Class_Initialize
     Set objParam = GetParameters
   End Sub
@@ -53,10 +60,15 @@ Class Parameters
     Dim objWshArguments: Set objWshArguments = WScript.Arguments
     Dim objWshNamed: Set objWshNamed = objWshArguments.Named
     Dim intParamCount: intParamCount = objWshArguments.Count()
+    Dim strParamMarkdown: strParamMarkdown = objWshNamed("Markdown")
     Set GetParameters = CreateObject("Scripting.Dictionary")
     With GetParameters
+      If intParamCount = 2 And IsEmpty(objWshNamed("RunLink")) And  objWshNamed.Exists("RunLink") And Len(strParamMarkdown) Then
+        .Add "Markdown", strParamMarkdown
+        .Add "RunLink", True
+        Exit Function
+      End If
       If intParamCount = 1 Then
-        Dim strParamMarkdown: strParamMarkdown = objWshNamed("Markdown")
         If Len(strParamMarkdown) Then
           .Add "Markdown", strParamMarkdown
           Set objWshNamed = Nothing
