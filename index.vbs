@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 Option Explicit
 
 Imports "src\parameters.vbs"
@@ -21,9 +21,7 @@ If Not IsEmpty(objParam.Markdown) Then
   Dim intCmdExeId
   objPackage.CreateIconLink objParam.Markdown
   GetObject("winmgmts:Win32_Process").Create Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" 2> ""{1}""""", Array(objPackage.IconLink.Path, objErrorLog.Path)),, objStartInfo, intCmdExeId
-  On Error Resume Next
-  WaitForExit intCmdExeId
-  On Error Goto 0
+  WaitForChildExit intCmdExeId
   objPackage.DeleteIconLink
   With objErrorLog
     .Read
@@ -51,11 +49,24 @@ Quit
 ''' <summary>
 ''' Wait for the process executing the link to exit.
 ''' </summary>
-''' <param name="intProcessId">The identifier of the process.</param>
-Sub WaitForExit(ByVal intProcessId)
-  Dim strMoniker: strMoniker = "winmgmts:Win32_Process=" & intProcessId
-  While Not IsNull(GetObject(strMoniker)) : Wend
+''' <param name="intParentProcessId">The identifier of the parent process.</param>
+Sub WaitForChildExit(ByVal intParentProcessId)
+  ' Select the process whose parent is the intermediate process used for executing the link.
+  Dim strWmiQuery: strWmiQuery = "SELECT * FROM Win32_Process WHERE Name='pwsh.exe' AND ParentProcessId=" & intParentProcessId
+  ' Wait for the child process to start.
+  While Not DoesWqlReturnProcess(strWmiQuery) : Wend
+  ' Wait for the child process to exit.
+  While DoesWqlReturnProcess(strWmiQuery) : Wend
 End Sub
+
+''' <summary>
+''' Get if the WQL query returns at least one process.
+''' </summary>
+''' <param name="strWmiQuery">The WQL query.</param>
+''' <returns>True if the process count is not 0.</returns>
+Function DoesWqlReturnProcess(ByVal strWmiQuery)
+  DoesWqlReturnProcess = CBool(GetObject("winmgmts:").ExecQuery(strWmiQuery).Count)
+End Function
 
 ''' <summary>
 ''' Replace "{n}" by the nth input argument recursively.
