@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.8</version>
+''' <version>0.0.1.9</version>
 Option Explicit
 
 Dim objFs, objWShell
@@ -26,10 +26,10 @@ If objParam.RunLink Then
 End If
 
 If Not IsEmpty(objParam.Markdown) Then
-  Imports "src\conhost.vbs"
-  ConsoleHost.SetConsoleHostProperties objPackage.PwshExePath, objPackage.PwshScriptPath
-  ConsoleHost.StartWith objParam.Markdown
-  Set ConsoleHost = Nothing
+  Imports "src\converter.vbs"
+  MarkdownToHtml.SetProperties objPackage.JsLibraryPath
+  MarkdownToHtml.ConvertFrom objParam.Markdown
+  Set MarkdownToHtml = Nothing
   Quit
 End If
 

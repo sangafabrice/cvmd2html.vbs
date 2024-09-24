@@ -2,7 +2,7 @@
 ''' Returns information about the resource files used by the project.
 ''' It also provides a way to manage the custom icon link that can be installed and uninstalled.
 ''' </summary>
-''' <version>0.0.1.5</version>
+''' <version>0.0.1.6</version>
 
 ''' <summary>
 ''' Represents the package files used by the project.
@@ -29,10 +29,10 @@ Class Package
   End Property
 
   ''' <summary>
-  ''' The shortcut target powershell script path string.
+  ''' The javascript library path string.
   ''' </summary>
-  Property Get PwshScriptPath
-    PwshScriptPath = objPackage("PwshScriptPath")
+  Property Get JsLibraryPath
+    JsLibraryPath = objPackage("JsLibraryPath")
   End Property
 
   ''' <summary>
@@ -40,13 +40,6 @@ Class Package
   ''' </summary>
   Property Get MenuIconPath
     MenuIconPath = objPackage("MenuIconPath")
-  End Property
-
-  ''' <summary>
-  ''' The powershell core runtime path string.
-  ''' </summary>
-  Property Get PwshExePath
-    PwshExePath = objPackage("PwshExePath")
   End Property
 
   ''' <summary>
@@ -61,9 +54,8 @@ Class Package
     With objPackage
       .Add "Root", objFs.GetParentFolderName(WScript.ScriptFullName)
       .Add "ResourcePath", objFs.BuildPath(.Item("Root"), "rsc")
-      .Add "PwshScriptPath", objFs.BuildPath(.Item("Root"), "cvmd2html.psd1")
+      .Add "JsLibraryPath", objFs.BuildPath(.Item("ResourcePath"), "showdown.min.js")
       .Add "MenuIconPath", objFs.BuildPath(.Item("ResourcePath"), "menu.ico")
-      .Add "PwshExePath", GetPwshPath
       .Add "IconLink", New IconLinkResource
     End With
   End Sub
@@ -95,15 +87,6 @@ Class Package
   ''' <returns>The specified link file object.</returns>
   Private Function GetCustomIconLink
     Set GetCustomIconLink = objWShell.CreateShortcut(Me.IconLink.Path)
-  End Function
-
-  ''' <summary>
-  ''' Get the PowerShell Core application path from the registry.
-  ''' </summary>
-  ''' <returns>The pwsh.exe full path.</returns>
-  Private Function GetPwshPath
-    ' The HKLM registry subkey stores the PowerShell Core application path.
-    GetPwshPath = objWShell.RegRead("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pwsh.exe\")
   End Function
 
   Private Sub Class_Terminate

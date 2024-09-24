@@ -1,7 +1,7 @@
 ''' <summary>
 ''' Exports the shortcut menu message box.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 
 Dim MessageBox: Set MessageBox = New MessageBoxType
 
@@ -27,12 +27,10 @@ Class MessageBoxType
     If varMessageType = vbExclamation Then
       varButton = vbYesNo
     End If
-    ' Match the button clicked with its name string.
+    ' Quit the application when the user presses Ok or No buttons.
     Select Case MsgBox(strMessage, varMessageType + varButton, "Convert to HTML")
-      Case vbYes
-        Show = "Yes"
-      Case vbNo
-        Show = "No"
+      Case vbOK, vbNo
+        Quit
     End Select 
   End Function
 
