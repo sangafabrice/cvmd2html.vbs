@@ -1,17 +1,12 @@
 ''' <summary>
 ''' Manage the error log file and content.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 
 ''' <summary>
 ''' Represents the input arguments and parameters.
 ''' </summary>
 Class ErrorLogHandler
-
-  ''' <summary>
-  ''' The file system object.
-  ''' </summary>
-  Private objFs
 
   ''' <summary>
   ''' The error log file path.
@@ -26,8 +21,7 @@ Class ErrorLogHandler
   End Property
 
   Private Sub Class_Initialize
-    Set objFs = CreateObject("Scripting.FileSystemObject")
-    strPath = objFs.BuildPath(CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%"), LCase(Mid(CreateObject("Scriptlet.TypeLib").Guid, 2, 36)) & ".tmp.log")
+    strPath = objFs.BuildPath(objWShell.ExpandEnvironmentStrings("%TEMP%"), LCase(Mid(objTypeLib.Guid, 2, 36)) & ".tmp.log")
   End Sub
 
   ''' <summary>
@@ -56,10 +50,6 @@ Class ErrorLogHandler
   Sub Delete
     On Error Resume Next
     objFs.DeleteFile Me.Path
-  End Sub
-
-  Private Sub Class_Terminate
-    Set objFs = Nothing
   End Sub
 
 End Class

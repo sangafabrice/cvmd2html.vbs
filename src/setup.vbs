@@ -1,17 +1,12 @@
 ''' <summary>
 ''' Returns the methods for managing the shortcut menu option: install and uninstall.
 ''' </summary>
-''' <version>0.0.1</version>
+''' <version>0.0.1.1</version>
 
 ''' <summary>
 ''' Represents the setup methods for managing the shortcut records in the registry.
 ''' </summary>
 Class Setup
-
-  ''' <summary>
-  ''' The WSH object.
-  ''' </summary>
-  Private objWShell
 
   ''' <summary>
   ''' The format of the HKCU key.
@@ -29,7 +24,6 @@ Class Setup
   Private VERB_KEY
 
   Private Sub Class_Initialize
-    Set objWShell = CreateObject("WScript.Shell")
     KEY_FORMAT = "HKCU\{0}\"
     HKCU = &H80000001
     VERB_KEY = "SOFTWARE\Classes\SystemFileAssociations\.md\shell\cthtml"
@@ -90,10 +84,6 @@ Class Setup
       objWShell.RegDelete Format(KEY_FORMAT, strKey)
       On Error Goto 0
     End With
-  End Sub
-
-  Private Sub Class_Terminate
-    Set objWShell = Nothing
   End Sub
 
 End Class

@@ -2,7 +2,7 @@
 ''' Returns information about the resource files used by the project.
 ''' It also provides a way to manage the custom icon link that can be installed and uninstalled.
 ''' </summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 ''' <summary>
 ''' Represents the package files used by the project.
@@ -13,16 +13,6 @@ Class Package
   ''' The package hashtable.
   ''' </summary>
   Private objPackage
-
-  ''' <summary>
-  ''' The file system object.
-  ''' </summary>
-  Private objFs
-
-  ''' <summary>
-  ''' The WSH object.
-  ''' </summary>
-  Private objWShell
 
   ''' <summary>
   ''' The project root path string.
@@ -67,8 +57,6 @@ Class Package
   End Property
 
   Private Sub Class_Initialize
-    Set objWShell = CreateObject("WScript.Shell")
-    Set objFs = CreateObject("Scripting.FileSystemObject")
     Set objPackage = CreateObject("Scripting.Dictionary")
     With objPackage
       .Add "Root", objFs.GetParentFolderName(WScript.ScriptFullName)
@@ -124,8 +112,6 @@ Class Package
       objPackage.RemoveAll
     End If
     Set objPackage = Nothing
-    Set objFs = Nothing
-    Set objWShell = Nothing
   End Sub
 
 End Class
@@ -162,9 +148,9 @@ Class IconLinkResource
   End Property
 
   Private Sub Class_Initialize()
-    strDirName = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%")
-    strName = LCase(Mid(CreateObject("Scriptlet.TypeLib").Guid, 2, 36)) & ".tmp.lnk"
-    strPath = CreateObject("Scripting.FileSystemObject").BuildPath(strDirName, strName)
+    strDirName = objWShell.ExpandEnvironmentStrings("%TEMP%")
+    strName = LCase(Mid(objTypeLib.Guid, 2, 36)) & ".tmp.lnk"
+    strPath = objFs.BuildPath(strDirName, strName)
   End Sub
 
 End Class
