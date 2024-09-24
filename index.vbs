@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.3</version>
+''' <version>0.0.1.4</version>
 Option Explicit
 
 Imports "src\parameters.vbs"
@@ -51,22 +51,12 @@ Quit
 ''' </summary>
 ''' <param name="intParentProcessId">The identifier of the parent process.</param>
 Sub WaitForChildExit(ByVal intParentProcessId)
+  ' The process termination event query.
   ' Select the process whose parent is the intermediate process used for executing the link.
-  Dim strWmiQuery: strWmiQuery = "SELECT * FROM Win32_Process WHERE Name='pwsh.exe' AND ParentProcessId=" & intParentProcessId
-  ' Wait for the child process to start.
-  While Not DoesWqlReturnProcess(strWmiQuery) : Wend
+  Dim strWmiQuery: strWmiQuery = "SELECT * FROM __InstanceDeletionEvent WITHIN 0.1 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.Name='pwsh.exe' AND TargetInstance.ParentProcessId=" & intParentProcessId
   ' Wait for the child process to exit.
-  While DoesWqlReturnProcess(strWmiQuery) : Wend
+  GetObject("winmgmts:").ExecNotificationQuery(strWmiQuery).NextEvent()
 End Sub
-
-''' <summary>
-''' Get if the WQL query returns at least one process.
-''' </summary>
-''' <param name="strWmiQuery">The WQL query.</param>
-''' <returns>True if the process count is not 0.</returns>
-Function DoesWqlReturnProcess(ByVal strWmiQuery)
-  DoesWqlReturnProcess = CBool(GetObject("winmgmts:").ExecQuery(strWmiQuery).Count)
-End Function
 
 ''' <summary>
 ''' Replace "{n}" by the nth input argument recursively.
