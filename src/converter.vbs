@@ -1,7 +1,7 @@
 ''' <summary>
 ''' The markdown to html converter.
 ''' </summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 Imports "src\msgbox.vbs"
 
@@ -18,10 +18,19 @@ Class MarkdownToHtmlType
   Private strJsLibraryPath
 
   ''' <summary>
+  ''' The path string of the html loading the library.
+  ''' </summary>
+  Private strHtmlLibraryPath
+
+  ''' <summary>
   ''' Set the properties of the converter.
   ''' </summary>
+  ''' <param name="strHtmlLibraryPathValue">The path string of the html loading the library.</param>
   ''' <param name="strJsLibraryPathValue">The javascript library path string.</param>
-  Sub SetProperties(ByVal strJsLibraryPathValue)
+  Sub SetProperties(ByVal strHtmlLibraryPathValue, ByVal strJsLibraryPathValue)
+    If IsEmpty(strHtmlLibraryPath) Then
+      strHtmlLibraryPath = strHtmlLibraryPathValue
+    End If
     If IsEmpty(strJsLibraryPath) Then
       strJsLibraryPath = strJsLibraryPathValue
     End If
@@ -111,22 +120,7 @@ Class MarkdownToHtmlType
     On Error Resume Next
     With CreateObject("htmlFile")
       .Open
-      .Write _
-        "<!DOCTYPE html>" & _
-        "<html>" & _
-        "<head>" & _
-          "<meta charset='UTF-8' />" & _
-          "<meta http-equiv='X-UA-Compatible' content='IE=edge' />" & _
-          "<script type='text/javascript'>" & _
-            GetContent(strJsLibraryPath) & _
-            "function convertMarkdown(markdownContent) {" & _
-              "return (new showdown.Converter()).makeHtml(markdownContent);" & _
-            "}" & _
-          "</script>" & _
-        "</head>" & _
-        "<body>" & _
-        "</body>" & _
-        "</html>"
+      .Write Format(GetContent(strHtmlLibraryPath), GetContent(strJsLibraryPath))
       .Close
       ConvertToHtml = .parentWindow.convertMarkdown(strMarkdownContent)
     End With
