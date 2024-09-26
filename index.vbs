@@ -5,8 +5,8 @@
 ''' <version>0.0.1</version>
 Option Explicit
 
-Imports "src\parameters.vbs"
-Imports "src\package.vbs"
+Call Imports("src\parameters.vbs")
+Call Imports("src\package.vbs")
 
 Dim objParam: Set objParam = New Parameters
 Dim objPackage: Set objPackage = New Package
@@ -19,21 +19,21 @@ If Not IsEmpty(objParam.Markdown) Then
   Const WINDOW_STYLE_HIDDEN = &HC
   Dim objStartInfo: Set objStartInfo = GetObject("winmgmts:Win32_ProcessStartup").SpawnInstance_
   objStartInfo.ShowWindow = WINDOW_STYLE_HIDDEN
-  GetObject("winmgmts:Win32_Process").Create Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" ""{1}""""", Array(objPackage.IconLink.Path, objParam.Markdown)),, objStartInfo
+  Call GetObject("winmgmts:Win32_Process").Create(Format("C:\Windows\System32\cmd.exe /d /c """"{0}"" ""{1}""""", Array(objPackage.IconLink.Path, objParam.Markdown)),, objStartInfo)
   Set objStartInfo = Nothing
   Quit
 End If
 
 ''' Configuration and settings.
 If objParam.Install Or objParam.Unset Then
-  Imports "src\setup.vbs"
+  Call Imports("src\setup.vbs")
   Dim objSetup: Set objSetup = New Setup
   If objParam.Install Then
-    objPackage.CreateIconLink
-    objSetup.Install objParam.NoIcon, objPackage.MenuIconPath
+    Call objPackage.CreateIconLink
+    Call objSetup.Install(objParam.NoIcon, objPackage.MenuIconPath)
   ElseIf objParam.Unset Then
-    objSetup.Unset
-    objPackage.DeleteIconLink
+    Call objSetup.Unset
+    Call objPackage.DeleteIconLink
   End If
   Set objSetup = Nothing
 End If
@@ -55,7 +55,7 @@ Function Format(ByVal strFormat, ByVal astrArgs)
   If intBound > -1 Then
     Dim strReplaceWith: strReplaceWith = astrArgs(intBound)
     Redim Preserve astrArgs(intBound - 1)
-    Format = Format(Replace(strFormat, "{" & intBound &"}", strReplaceWith), astrArgs)
+    Format = Format(Replace(strFormat, "{" + CStr(intBound) + "}", strReplaceWith), astrArgs)
     Exit Function
   End If
   Format = strFormat

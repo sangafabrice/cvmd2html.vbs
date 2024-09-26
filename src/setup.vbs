@@ -35,21 +35,21 @@ Class Setup
   ''' <param name="blnParamNoIcon">Specifies that the custom menu icon should not be set.</param>
   ''' <param name="strMenuIconPath">The shortcut menu icon path.</param>
   Sub Install(ByVal blnParamNoIcon, ByVal strMenuIconPath)
-    Dim strCommandKey: strCommandKey = VERB_KEY & "\command"
+    Dim strCommandKey: strCommandKey = VERB_KEY + "\command"
     With New RegExp
       .Pattern = "\\cscript\.exe$"
       .IgnoreCase = True
       Dim strCommand: strCommand = Format("{0} ""{1}"" /Markdown:""%1""", Array(.Replace(WScript.FullName, "\wscript.exe"), WScript.ScriptFullName))
     End With
     With objRegistry
-      .CreateKey HKCU, strCommandKey
-      .SetStringValue HKCU, strCommandKey,, strCommand
-      .SetStringValue HKCU, VERB_KEY,, "Convert to &HTML"
+      Call .CreateKey(HKCU, strCommandKey)
+      Call .SetStringValue(HKCU, strCommandKey,, strCommand)
+      Call .SetStringValue(HKCU, VERB_KEY,, "Convert to &HTML")
       Dim strIconValueName: strIconValueName = "Icon"
       If objParam.NoIcon Then
-        .DeleteValue HKCU, VERB_KEY, strIconValueName
+        Call .DeleteValue(HKCU, VERB_KEY, strIconValueName)
       Else
-        .SetStringValue HKCU, VERB_KEY, strIconValueName, strMenuIconPath
+        Call .SetStringValue(HKCU, VERB_KEY, strIconValueName, strMenuIconPath)
       End If
     End With
   End Sub
@@ -72,13 +72,13 @@ Class Setup
   Private Sub DeleteSubkeyTree(ByVal strKey)
     Dim astrSNames, strSName
     With objRegistry
-      .EnumKey HKCU, strKey, astrSNames
+      Call .EnumKey(HKCU, strKey, astrSNames)
       If IsArray(astrSNames) Then
         For Each strSName In astrSNames
-          DeleteSubkeyTree Format("{0}\{1}", Array(strKey, strSName))
+          Call DeleteSubkeyTree(Format("{0}\{1}", Array(strKey, strSName)))
         Next
       End If
-      .DeleteKey HKCU, strKey
+      Call .DeleteKey(HKCU, strKey)
     End With
   End Sub
 

@@ -53,29 +53,29 @@ Class Parameters
     Dim objWshArguments: Set objWshArguments = WScript.Arguments
     Dim objWshNamed: Set objWshNamed = objWshArguments.Named
     Dim intParamCount: intParamCount = objWshArguments.Count()
-    Set GetParameters = CreateObject("Scripting.Dictionary")
+    Set GetParameters = WScript.CreateObject("Scripting.Dictionary")
     With GetParameters
       If intParamCount = 1 Then
         Dim strParamMarkdown: strParamMarkdown = objWshNamed("Markdown")
         If Len(strParamMarkdown) Then
-          .Add "Markdown", strParamMarkdown
+          Call .Add("Markdown", strParamMarkdown)
           Set objWshNamed = Nothing
           Set objWshArguments = Nothing
           Exit Function
         End If
-        .Add "Set", objWshNamed.Exists("Set")
+        Call .Add("Set", objWshNamed.Exists("Set"))
         If .Item("Set") Then
           Dim strNoIconParam: strNoIconParam = objWshNamed("Set")
           Dim blnIsNoIconParam: blnIsNoIconParam = CBool(Not StrComp(strNoIconParam, "NoIcon", vbTextCompare))
           If IsEmpty(strNoIconParam) Or blnIsNoIconParam Then
-            .Add "NoIcon", blnIsNoIconParam
+            Call .Add("NoIcon", blnIsNoIconParam)
             Set objWshNamed = Nothing
             Set objWshArguments = Nothing
             Exit Function
           End If
         End If
         .RemoveAll
-        .Add "Unset", objWshNamed.Exists("Unset") And IsEmpty(objWshNamed("Unset"))
+        Call .Add("Unset", objWshNamed.Exists("Unset") And IsEmpty(objWshArguments.Named("Unset")))
         If .Item("Unset") Then
           Set objWshNamed = Nothing
           Set objWshArguments = Nothing
@@ -83,8 +83,8 @@ Class Parameters
         End If
         .RemoveAll
       ElseIf intParamCount = 0 Then
-        .Add "Set", True
-        .Add "NoIcon", False
+        Call .Add("Set", True)
+        Call .Add("NoIcon", False)
         Set objWshNamed = Nothing
         Set objWshArguments = Nothing
         Exit Function
@@ -101,18 +101,18 @@ Class Parameters
   ''' </summary>
   Private Sub ShowHelp
     Dim strHelpText: strHelpText = ""
-    strHelpText = strHelpText & "The MarkdownToHtml shortcut launcher." & vbCrLf
-    strHelpText = strHelpText & "It starts the shortcut menu target script in a hidden window." & vbCrLf & vbCrLf
-    strHelpText = strHelpText & "Syntax:" & vbCrLf
-    strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs /Markdown:<markdown file path>" & vbCrLf
-    strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs [/Set[:NoIcon]]" & vbCrLf
-    strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs /Unset" & vbCrLf
-    strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs /Help" & vbCrLf & vbCrLf
-    strHelpText = strHelpText & "<markdown file path>  The selected markdown's file path." & vbCrLf
-    strHelpText = strHelpText & "                 Set  Configure the shortcut menu in the registry." & vbCrLf
-    strHelpText = strHelpText & "              NoIcon  Specifies that the icon is not configured." & vbCrLf
-    strHelpText = strHelpText & "               Unset  Removes the shortcut menu." & vbCrLf
-    strHelpText = strHelpText & "                Help  Show the help doc." & vbCrLf
+    strHelpText = strHelpText + "The MarkdownToHtml shortcut launcher." + vbCrLf
+    strHelpText = strHelpText + "It starts the shortcut menu target script in a hidden window." + vbCrLf + vbCrLf
+    strHelpText = strHelpText + "Syntax:" + vbCrLf
+    strHelpText = strHelpText + "  Convert-MarkdownToHtml.vbs /Markdown:<markdown file path>" + vbCrLf
+    strHelpText = strHelpText + "  Convert-MarkdownToHtml.vbs [/Set[:NoIcon]]" + vbCrLf
+    strHelpText = strHelpText + "  Convert-MarkdownToHtml.vbs /Unset" + vbCrLf
+    strHelpText = strHelpText + "  Convert-MarkdownToHtml.vbs /Help" + vbCrLf + vbCrLf
+    strHelpText = strHelpText + "<markdown file path>  The selected markdown's file path." + vbCrLf
+    strHelpText = strHelpText + "                 Set  Configure the shortcut menu in the registry." + vbCrLf
+    strHelpText = strHelpText + "              NoIcon  Specifies that the icon is not configured." + vbCrLf
+    strHelpText = strHelpText + "               Unset  Removes the shortcut menu." + vbCrLf
+    strHelpText = strHelpText + "                Help  Show the help doc." + vbCrLf
     With WScript
       .Echo strHelpText
       .Quit
@@ -121,7 +121,7 @@ Class Parameters
 
   Private Sub Class_Terminate
     If Not IsEmpty(objParam) Then
-      objParam.RemoveAll
+      Call objParam.RemoveAll
     End If
     Set objParam = Nothing
   End Sub

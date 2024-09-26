@@ -62,15 +62,15 @@ Class Package
   End Property
 
   Private Sub Class_Initialize
-    Set objFs = CreateObject("Scripting.FileSystemObject")
-    Set objPackage = CreateObject("Scripting.Dictionary")
+    Set objFs = WScript.CreateObject("Scripting.FileSystemObject")
+    Set objPackage = WScript.CreateObject("Scripting.Dictionary")
     With objPackage
-      .Add "Root", objFs.GetParentFolderName(WScript.ScriptFullName)
-      .Add "ResourcePath", objFs.BuildPath(.Item("Root"), "rsc")
-      .Add "PwshScriptPath", objFs.BuildPath(.Item("ResourcePath"), "cvmd2html.ps1")
-      .Add "MenuIconPath", objFs.BuildPath(.Item("ResourcePath"), "menu.ico")
-      .Add "PwshExePath", GetPwshPath
-      .Add "IconLink", New IconLinkResource
+      Call .Add("Root", objFs.GetParentFolderName(WScript.ScriptFullName))
+      Call .Add("ResourcePath", objFs.BuildPath(.Item("Root"), "rsc"))
+      Call .Add("PwshScriptPath", objFs.BuildPath(.Item("ResourcePath"), "cvmd2html.ps1"))
+      Call .Add("MenuIconPath", objFs.BuildPath(.Item("ResourcePath"), "menu.ico"))
+      Call .Add("PwshExePath", GetPwshPath)
+      Call .Add("IconLink", New IconLinkResource)
     End With
   End Sub
 
@@ -78,11 +78,11 @@ Class Package
   ''' Create the custom icon link file.
   ''' </summary>
   Sub CreateIconLink
-    objFs.CreateTextFile(Me.IconLink.Path).Close
-    With CreateObject("Shell.Application").NameSpace(Me.IconLink.DirName).ParseName(Me.IconLink.Name).GetLink
+    Call objFs.CreateTextFile(Me.IconLink.Path).Close()
+    With WScript.CreateObject("Shell.Application").NameSpace(Me.IconLink.DirName).ParseName(Me.IconLink.Name).GetLink
       .Path = Me.PwshExePath 
       .Arguments = Format("-ep Bypass -nop -w Hidden -f ""{0}"" -Markdown", Me.PwshScriptPath)
-      .SetIconLocation Me.MenuIconPath, 0
+      Call .SetIconLocation(Me.MenuIconPath, 0)
       .Save
     End With
   End Sub
@@ -92,7 +92,7 @@ Class Package
   ''' </summary>
   Sub DeleteIconLink
     On Error Resume Next
-    objFs.DeleteFile Me.IconLink.Path
+    Call objFs.DeleteFile(Me.IconLink.Path)
   End Sub
 
   ''' <summary>
@@ -121,13 +121,13 @@ Class Package
   ''' <returns>The pwsh.exe full path.</returns>
   Private Function GetPwshPath
     ' The HKLM registry subkey stores the PowerShell Core application path.
-    GetObject("winmgmts:StdRegProv").GetStringValue , "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pwsh.exe",, GetPwshPath
+    Call GetObject("winmgmts:StdRegProv").GetStringValue(, "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\pwsh.exe",, GetPwshPath)
   End Function
 
   Private Sub Class_Terminate
     If Not IsEmpty(objPackage) Then
       Set objPackage("IconLink") = Nothing
-      objPackage.RemoveAll
+      Call objPackage.RemoveAll
     End If
     Set objPackage = Nothing
     Set objFs = Nothing
@@ -167,9 +167,9 @@ Class IconLinkResource
   End Property
 
   Private Sub Class_Initialize()
-    strDirName = CreateObject("WScript.Shell").SpecialFolders("StartMenu")
+    strDirName = WScript.CreateObject("WScript.Shell").SpecialFolders("StartMenu")
     strName = "cvmd2html.lnk"
-    strPath = CreateObject("Scripting.FileSystemObject").BuildPath(strDirName, strName)
+    strPath = WScript.CreateObject("Scripting.FileSystemObject").BuildPath(strDirName, strName)
   End Sub
 
 End Class
