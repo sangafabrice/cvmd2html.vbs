@@ -1,7 +1,7 @@
 ''' <summary>
 ''' Returns the parsed parameters.
 ''' </summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 ''' <summary>
 ''' Represents the input arguments and parameters.
@@ -59,8 +59,13 @@ Class Parameters
   Private Function GetParameters
     Dim objWshArguments: Set objWshArguments = WScript.Arguments
     Dim objWshNamed: Set objWshNamed = objWshArguments.Named
+    Dim objWshUnNamed: Set objWshUnNamed = objWshArguments.UnNamed
     Dim intParamCount: intParamCount = objWshArguments.Count()
-    Dim strParamMarkdown: strParamMarkdown = objWshNamed("Markdown")
+    Dim intUnnamedParamCount: intUnnamedParamCount = objWshUnNamed.Count
+    Dim strParamMarkdown
+    If intUnnamedParamCount = 1 Then
+      strParamMarkdown = objWshUnNamed(0)
+    End If
     Set GetParameters = CreateObject("Scripting.Dictionary")
     With GetParameters
       If intParamCount = 2 And IsEmpty(objWshNamed("RunLink")) And  objWshNamed.Exists("RunLink") And Len(strParamMarkdown) Then
@@ -116,7 +121,7 @@ Class Parameters
     strHelpText = strHelpText & "The MarkdownToHtml shortcut launcher." & vbCrLf
     strHelpText = strHelpText & "It starts the shortcut menu target script in a hidden window." & vbCrLf & vbCrLf
     strHelpText = strHelpText & "Syntax:" & vbCrLf
-    strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs /Markdown:<markdown file path>" & vbCrLf
+    strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs <markdown file path>" & vbCrLf
     strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs [/Set[:NoIcon]]" & vbCrLf
     strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs /Unset" & vbCrLf
     strHelpText = strHelpText & "  Convert-MarkdownToHtml.vbs /Help" & vbCrLf & vbCrLf

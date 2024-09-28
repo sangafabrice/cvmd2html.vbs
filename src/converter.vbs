@@ -120,12 +120,35 @@ Class MarkdownToHtmlType
     On Error Resume Next
     With CreateObject("htmlFile")
       .Open
-      .Write Format(GetContent(strHtmlLibraryPath), strJsLibraryPath)
+      .Write GetBytes(Format(GetContent(strHtmlLibraryPath), strJsLibraryPath))
       .Close
       While IsEmpty(.parentWindow.showdown)
         WScript.Sleep 1
       Wend
       ConvertToHtml = .parentWindow.convertMarkdown(strMarkdownContent)
+    End With
+  End Function
+
+  ''' <summary>
+  ''' Convert a text string to a unicode encoded string.
+  ''' </summary>
+  ''' <param name="strContent">The text to convert.</param>
+  ''' <returns>A byte encoded string.</returns>
+  Private Function GetBytes(ByVal strContent)
+    Const TEXT_TYPE = 2
+    Const READWRITE_MODE = 3
+    Const BYTE_MODE = 1
+    With CreateObject("ADODB.Stream")
+      ' Write content in text mode.
+      .Type = TEXT_TYPE
+      .Mode = READWRITE_MODE
+      .Open
+      .WriteText strContent
+      ' Start reading from the first byte.
+      .Position = 0
+      .Type = BYTE_MODE
+      GetBytes = .Read
+      .Close
     End With
   End Function
 

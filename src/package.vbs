@@ -75,7 +75,7 @@ Class Package
   Sub CreateIconLink(ByVal strMarkdownPath)
     With GetCustomIconLink
       .TargetPath = GetDefaultCustomIconLinkTarget
-      .Arguments = Format("""{0}"" /Markdown:""{1}""", Array(WScript.ScriptFullName, strMarkdownPath))
+      .Arguments = Format("""{0}"" ""{1}""", Array(WScript.ScriptFullName, strMarkdownPath))
       .IconLocation = Me.MenuIconPath
       .Save
     End With

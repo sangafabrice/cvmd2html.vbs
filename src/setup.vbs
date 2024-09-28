@@ -36,7 +36,7 @@ Class Setup
   ''' <param name="strMenuIconPath">The shortcut menu icon path.</param>
   Sub Install(ByVal blnParamNoIcon, ByVal strMenuIconPath)
     Dim strCommandKey: strCommandKey = VERB_KEY & "\command"
-    Dim strCommand: strCommand = Format("{0} ""{1}"" /Markdown:""%1"" /RunLink", Array(GetDefaultCustomIconLinkTarget, WScript.ScriptFullName))
+    Dim strCommand: strCommand = Format("{0} ""{1}"" ""%1"" /RunLink", Array(GetDefaultCustomIconLinkTarget, WScript.ScriptFullName))
     With objRegistry
       .CreateKey HKCU, strCommandKey
       .SetStringValue HKCU, strCommandKey,, strCommand
