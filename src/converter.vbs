@@ -1,7 +1,7 @@
 ''' <summary>
 ''' The markdown to html converter.
 ''' </summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 
 Imports "src\msgbox.vbs"
 
@@ -120,8 +120,11 @@ Class MarkdownToHtmlType
     On Error Resume Next
     With CreateObject("htmlFile")
       .Open
-      .Write Format(GetContent(strHtmlLibraryPath), GetContent(strJsLibraryPath))
+      .Write Format(GetContent(strHtmlLibraryPath), strJsLibraryPath)
       .Close
+      While IsEmpty(.parentWindow.showdown)
+        WScript.Sleep 1
+      Wend
       ConvertToHtml = .parentWindow.convertMarkdown(strMarkdownContent)
     End With
   End Function
