@@ -2,7 +2,7 @@
 ''' Returns information about the resource files used by the project.
 ''' It also provides a way to manage the custom icon link that can be installed and uninstalled.
 ''' </summary>
-''' <version>0.0.1.7</version>
+''' <version>0.0.1.8</version>
 
 ''' <summary>
 ''' Represents the package files used by the project.
@@ -26,13 +26,6 @@ Class Package
   ''' </summary>
   Property Get ResourcePath
     ResourcePath = objPackage("ResourcePath")
-  End Property
-
-  ''' <summary>
-  ''' The javascript library path string.
-  ''' </summary>
-  Property Get JsLibraryPath
-    JsLibraryPath = objPackage("JsLibraryPath")
   End Property
 
   ''' <summary>
@@ -61,7 +54,6 @@ Class Package
     With objPackage
       .Add "Root", objFs.GetParentFolderName(WScript.ScriptFullName)
       .Add "ResourcePath", objFs.BuildPath(.Item("Root"), "rsc")
-      .Add "JsLibraryPath", objFs.BuildPath(.Item("ResourcePath"), "showdown.min.js")
       .Add "HtmlLibraryPath", objFs.BuildPath(.Item("ResourcePath"), "showdown.html")
       .Add "MenuIconPath", objFs.BuildPath(.Item("ResourcePath"), "menu.ico")
       .Add "IconLink", New IconLinkResource

@@ -2,7 +2,7 @@
 ''' Launch the shortcut target PowerShell script with the selected markdown as an argument.
 ''' It aims to eliminate the flashing console window when the user clicks on the shortcut menu.
 ''' </summary>
-''' <version>0.0.1.10</version>
+''' <version>0.0.1.11</version>
 Option Explicit
 
 Dim objFs, objWShell
@@ -27,7 +27,7 @@ End If
 
 If Not IsEmpty(objParam.Markdown) Then
   Imports "src\converter.vbs"
-  MarkdownToHtml.SetProperties objPackage.HtmlLibraryPath, objPackage.JsLibraryPath
+  MarkdownToHtml.SetProperties objPackage.HtmlLibraryPath
   MarkdownToHtml.ConvertFrom objParam.Markdown
   Set MarkdownToHtml = Nothing
   Quit

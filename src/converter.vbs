@@ -1,7 +1,7 @@
 ''' <summary>
 ''' The markdown to html converter.
 ''' </summary>
-''' <version>0.0.1.3</version>
+''' <version>0.0.1.4</version>
 
 Imports "src\msgbox.vbs"
 
@@ -13,11 +13,6 @@ Dim MarkdownToHtml: Set MarkdownToHtml = New MarkdownToHtmlType
 Class MarkdownToHtmlType
 
   ''' <summary>
-  ''' The javascript library path string.
-  ''' </summary>
-  Private strJsLibraryPath
-
-  ''' <summary>
   ''' The path string of the html loading the library.
   ''' </summary>
   Private strHtmlLibraryPath
@@ -26,13 +21,9 @@ Class MarkdownToHtmlType
   ''' Set the properties of the converter.
   ''' </summary>
   ''' <param name="strHtmlLibraryPathValue">The path string of the html loading the library.</param>
-  ''' <param name="strJsLibraryPathValue">The javascript library path string.</param>
-  Sub SetProperties(ByVal strHtmlLibraryPathValue, ByVal strJsLibraryPathValue)
+  Sub SetProperties(ByVal strHtmlLibraryPathValue)
     If IsEmpty(strHtmlLibraryPath) Then
       strHtmlLibraryPath = strHtmlLibraryPathValue
-    End If
-    If IsEmpty(strJsLibraryPath) Then
-      strJsLibraryPath = strJsLibraryPathValue
     End If
   End Sub
 
@@ -120,7 +111,7 @@ Class MarkdownToHtmlType
     On Error Resume Next
     With CreateObject("htmlFile")
       .Open
-      .Write Format(GetContent(strHtmlLibraryPath), strJsLibraryPath)
+      .Write GetContent(strHtmlLibraryPath)
       .Close
       While IsEmpty(.parentWindow.showdown)
         WScript.Sleep 1
